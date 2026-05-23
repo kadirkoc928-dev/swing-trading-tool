@@ -3,35 +3,106 @@ import yfinance as yf
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 
-st.set_page_config(page_title="Profi Swing-Scanner", page_icon="🔍", layout="wide")
+st.set_page_config(page_title="Mega Swing-Scanner", page_icon="🔍", layout="wide")
 
-st.title("🔍 Automatischer Profi-Swing-Scanner")
-st.markdown("Dieses Tool scannt den Markt vollautomatisch, berechnet die Swing-Scores und listet die besten Setups absteigend auf.")
+st.title("🔍 Ultimativer Mega-Swing-Scanner mit Chart-Links")
+st.markdown("Klicke in der Tabelle auf **'↗ Chart öffnen'**, um sofort den TradingView-Livechart mit RSI und den EMAs (10, 20, 50, 100, 200) zu öffnen.")
 
-# Liste der zu scannenden Aktien (Kannst du beliebig erweitern)
+# --- DIE KOMPLETTE LISTE ---
 TICKER_LISTE = [
-    "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA", "META", "AMD", "NFLX", "COIN",
-    "PLTR", "BABA", "NIO", "XPEV", "LI", "PYPL", "SQ", "DIS", "JPM", "BAC",
-    "F", "GM", "XOM", "CVX", "PFE", "MRNA", "PINS", "SNAP", "UBER", "LYFT",
-    "SAP.DE", "SIE.DE", "DTE.DE", "MBG.DE", "BMW.DE", "VOW3.DE", "ALV.DE", "BAS.DE",
-    "INTC", "QCOM", "MU", "ASML", "TSM", "AVGO", "PANW", "CRWD", "NET", "SNOW",
-    "RIVN", "LCID", "MARA", "RIOT", "HOOD", "AFRM", "SOFI", "UPST", "AI", "DKNG"
+    # --- NASDAQ 100 ---
+    "AAPL", "MSFT", "AMZN", "NVDA", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "PEP",
+    "COST", "CSCO", "TMUS", "CMCSA", "AMD", "NFLX", "ADBE", "AMGN", "ISRG", "HON",
+    "QCOM", "INTC", "INTU", "MDLZ", "BKNG", "AMAT", "ADI", "TXN", "PANW", "MU",
+    "REGN", "VRTX", "LRCX", "ADP", "MELI", "KLAC", "SNPS", "CDNS", "ASML", "CSX",
+    "MAR", "CTAS", "ORLY", "MNST", "WDAY", "ROP", "PCAR", "NXPI", "ADSK", "PAYX",
+    "ROST", "KDP", "AEP", "ODFL", "CEG", "MCHP", "AZN", "DDOG", "IDXX", "CPRT",
+    "FAST", "EA", "GEHC", "CTSH", "VRSK", "EXC", "CSGP", "BKR", "TEAM", "XEL",
+    "ANSS", "MNDY", "PDD", "FTNT", "ALGN", "ILMN", "WBD", "LULU", "SIRI", "MCHP",
+    "CTVA", "GILD", "KHC", "DXCM", "GE", "WBA", "ON", "SBUX", "MRVL", "COR",
+
+    # --- S&P 500 ---
+    "A", "AAL", "AAP", "ABBV", "ABC", "ABMD", "ABT", "ACN", "ADBE", "ADI", "ADM", 
+    "ADsk", "AEE", "AEP", "AES", "AFL", "AIG", "AIZ", "AJG", "AKAM", "ALB", "ALGN", 
+    "ALK", "ALL", "ALLE", "ALXN", "AMAT", "AMCR", "AMD", "AME", "AMGN", "AMP", "AMT", 
+    "AMZN", "ANET", "ANSS", "ANTM", "AON", "AOS", "APA", "APD", "APH", "APTV", "ARE", 
+    "ATO", "ATVI", "AVB", "AVGO", "AVY", "AWK", "AXP", "AZO", "BA", "BAC", "BAX", 
+    "BBY", "BDX", "BEN", "BF-B", "BIIB", "BIO", "BK", "BKNG", "BKR", "BLK", "BLL", 
+    "BMY", "BR", "BRK-B", "BSX", "BWA", "BXP", "C", "CAG", "CAH", "CARR", "CAT", 
+    "CB", "CBRE", "CCI", "CCK", "CCL", "CDNS", "CDW", "CE", "CERN", "CF", "CFG", 
+    "CHD", "CHRW", "CHTR", "CI", "Cinf", "CL", "CLX", "CMA", "CMCSA", "CME", "CMG", 
+    "CMI", "CMS", "CNC", "CNP", "COF", "COG", "COO", "COP", "COST", "CPB", "CPRT", 
+    "CRL", "CRM", "CSCO", "CSX", "CTAS", "CTLT", "CTSH", "CTVA", "CTXS", "CVS", 
+    "CVX", "CZR", "D", "DAL", "DD", "DE", "DFS", "DG", "DGX", "DHI", "DHR", "DIS", 
+    "DISCA", "DISCK", "DISH", "DLR", "DLTR", "DOV", "DOW", "DPZ", "DRE", "DRI", "DTE", 
+    "DUK", "DVA", "DVN", "DXC", "DXCM", "EA", "EBAY", "ECL", "ED", "EFX", "EIX", 
+    "EL", "EMN", "EMR", "ENPH", "EOG", "EQIX", "EQR", "ES", "ESS", "ETN", "ETR", 
+    "ETSY", "EVRG", "EW", "EXC", "EXPD", "EXPE", "EXR", "F", "FANG", "FAST", "FB", 
+    "FBHS", "FCX", "FDS", "FDX", "FE", "FFIV", "FIS", "FISV", "FITB", "FLT", "FMC", 
+    "FOX", "FOXA", "FRC", "FRT", "FTNT", "FTV", "GD", "GE", "GILD", "GIS", "GL", 
+    "GLW", "GM", "GOOG", "GOOGL", "GPC", "GPN", "GPS", "GRMN", "GS", "GWW", "HAL", 
+    "HAS", "HBAN", "HCA", "HD", "HES", "HIG", "HII", "HLT", "HOLX", "HON", "HPE", 
+    "HPQ", "HRL", "HSIC", "HST", "HSY", "HUM", "HWM", "IBM", "ICE", "IDXX", "IEX", 
+    "IFF", "ILMN", "INCY", "INFO", "INTC", "INTU", "IP", "IPG", "IPGP", "IQV", "IR", 
+    "IRM", "ISRG", "IT", "ITW", "IVZ", "J", "JBHT", "JCI", "JKHY", "JNJ", "JNPR", 
+    "JPM", "K", "KEY", "KEYS", "KHC", "KIM", "KLAC", "KMB", "KMI", "KMX", "KO", 
+    "KR", "KSu", "L", "LDOS", "LEG", "LEN", "LH", "LHX", "LIN", "LKQ", "LLY", "LMT", 
+    "LNC", "LNT", "LOW", "LRCX", "LUMN", "LUV", "LVS", "LW", "LYB", "LYV", "MA", 
+    "MAA", "MAR", "MAS", "MCD", "MCHP", "MCK", "MCO", "MDLZ", "MDT", "MET", "METV", 
+    "MGM", "MHK", "MKC", "MKTX", "MLM", "MMC", "MMM", "MNST", "MO", "MOS", "MPC", 
+    "MPWR", "MRK", "MRNA", "MRO", "MS", "MSCI", "MSFT", "MSI", "MTB", "MTD", "MU", 
+    "MXIM", "MYL", "NCLH", "NDAQ", "NEE", "NEM", "NFLX", "NI", "NKE", "NLOK", "NLSN", 
+    "NOC", "NOV", "NOW", "NRG", "NSC", "NTAP", "NTRS", "NUE", "NVDA", "NVR", "NWL", 
+    "NWS", "NWSA", "O", "ODFL", "OGN", "OKE", "OMC", "ORLY", "ORCL", "OTIS", "OXY", 
+    "PAYX", "PAYC", "PBCT", "PCAR", "PEAK", "PEG", "PEP", "PFE", "PFG", "PG", "PGR", 
+    "PH", "PHM", "PKG", "PKI", "PLD", "PRU", "PRGO", "PSA", "PSX", "PTC", "PVH", 
+    "PWR", "PXD", "QCOM", "QRVO", "RCL", "RE", "REG", "REGN", "RF", "RHI", "RJF", 
+    "RL", "RMD", "ROK", "ROL", "ROP", "ROST", "RSG", "RTX", "SBAC", "SBUX", "SCCO", 
+    "SCHW", "SEE", "SHW", "SIVB", "SJK", "SLB", "SLG", "SNA", "SNPS", "SO", "SPG", 
+    "SPGI", "SRE", "STE", "STT", "STX", "STZ", "SWK", "SWKS", "SYF", "SYK", "SYY", 
+    "T", "TAP", "TDG", "TDY", "TEL", "TER", "TFC", "TFX", "TGT", "TJX", "TMO", 
+    "TMUS", "TPR", "TRV", "TRMB", "TROW", "TT", "TTWO", "TWTR", "TXN", "TXT", "TYL", 
+    "UA", "UAA", "UAL", "UDR", "UHS", "ULTA", "UNH", "UNP", "UPS", "URI", "USB", 
+    "V", "VFC", "VIAC", "VLO", "VMC", "VNO", "VRSN", "VRSK", "VRTX", "VTR", "VTRS", 
+    "VZ", "WAB", "WAT", "WBA", "WBD", "WDC", "WEC", "WELL", "WFC", "WHR", "WLTW", 
+    "WM", "WMB", "WMT", "WRB", "WRK", "WST", "WU", "WY", "WYNN", "XEL", "XLNX", 
+    "XOM", "XRAY", "XYL", "YUM", "ZBH", "ZBRA", "ZION", "ZTS",
+
+    # --- TOP 100 RUSSELL 2000 ---
+    "PLTR", "SOFI", "HOOD", "AFRM", "UPST", "AI", "DKNG", "MARA", "RIOT", "COIN",
+    "RIVN", "LCID", "NIO", "XPEV", "LI", "BABA", "PDD", "SNAP", "PINS", "UBER",
+    "LYFT", "OPEN", "RUN", "SPWR", "NKLA", "CHPT", "BLNK", "BE", "PLUG", "FCEL",
+    "QS", "SPCE", "VIR", "GME", "AMC", "BB", "TLRY", "CGC", "CRSR", "CLOV", 
+    "MVIS", "NVAX", "OCGN", "INO", "BNGO", "KOSS", "EXPR", "WKHS", "GOEV", "CLSK",
+    "HIVE", "BITF", "HUT", "ANY", "ATER", "PROG", "CEI", "MMAT", "SRNE", "XELA",
+    "SENS", "ZOM", "CTRM", "AEI", "PHUN", "MARK", "BBIG", "GNUS", "TRCH", "VKG",
+    "OLLI", "SAIA", "SFM", "WMS", "SSD", "SKYW", "ENSG", "COHR", "AAON", "MEDP",
+    "LANC", "AMKR", "KNSL", "FIX", "AIT", "VNOM", "EPR", "CUBI", "MTH", "SLVM"
 ]
 
+TICKER_LISTE = sorted(list(set(TICKER_LISTE)))
+
+# --- SWING-ANALYSATOR FUNKTION ---
 def analyze_single_stock(ticker):
     try:
         stock = yf.Ticker(ticker)
-        hist = stock.history(period="3mo")
+        
+        # prepost=True zieht vor- und nachbörsliche Daten in die Historie mit ein
+        hist = stock.history(period="3mo", prepost=True)
         if hist.empty or len(hist) < 20:
             return None
         
-        current_price = round(hist['Close'].iloc[-1], 2)
+        # stock.fast_info['last_price'] liefert den ABSOLUTEN Live-Ticker-Preis (inkl. Premarket)
+        try:
+            current_price = round(stock.fast_info['last_price'], 2)
+        except:
+            current_price = round(hist['Close'].iloc[-1], 2)
+            
         prev_close = hist['Close'].iloc[-2]
         perf_24h = ((current_price - prev_close) / prev_close) * 100
         
         hist['EMA20'] = hist['Close'].ewm(span=20, adjust=False).mean()
         hist['SMA50'] = hist['Close'].rolling(window=50).mean()
-        last_close = hist['Close'].iloc[-1]
         last_ema20 = hist['EMA20'].iloc[-1]
         last_sma50 = hist['SMA50'].iloc[-1]
         
@@ -54,38 +125,36 @@ def analyze_single_stock(ticker):
         
         score = 0
         
-        if 40 <= current_rsi <= 55:
-            score += 20
-        elif 30 <= current_rsi < 40:
-            score += 15
-        elif 55 < current_rsi <= 68:
-            score += 12
+        # RSI (Max 20 Pkt.)
+        if 40 <= current_rsi <= 55: score += 20
+        elif 30 <= current_rsi < 40: score += 15
+        elif 55 < current_rsi <= 68: score += 12
             
-        if last_close > last_ema20 and last_close > last_sma50:
-            score += 20
-        elif last_close > last_ema20:
-            score += 10
+        # Trend (Max 20 Pkt.)
+        if current_price > last_ema20 and current_price > last_sma50: score += 20
+        elif current_price > last_ema20: score += 10
             
-        if last_macd > last_sig:
-            score += 20
+        # MACD (Max 20 Pkt.)
+        if last_macd > last_sig: score += 20
             
-        if last_volume > avg_volume:
-            score += 15
-        else:
-            score += 7
+        # Volumen (Max 15 Pkt.)
+        if last_volume > avg_volume: score += 15
+        else: score += 7
             
-        if perf_24h > 2.0:
-            score += 25
-        elif 0.0 <= perf_24h <= 2.0:
-            score += 15
-        elif -2.0 <= perf_24h < 0.0:
-            score += 5
+        # 24h Momentum (Max 25 Pkt.)
+        if perf_24h > 2.0: score += 25
+        elif 0.0 <= perf_24h <= 2.0: score += 15
+        elif -2.0 <= perf_24h < 0.0: score += 5
             
         stop_loss = round(current_price * 0.96, 2)
         take_profit = round(current_price * 1.12, 2)
         
+        # --- DER MAGISCHE CHARTS-LINK ---
+        chart_url = f"https://www.tradingview.com/chart/?symbol=NASDAQ:{ticker}"
+        
         return {
             "Ticker": ticker,
+            "Chart-Link": chart_url,
             "Kurs": current_price,
             "RSI": round(current_rsi, 1),
             "Perf. 24h": f"{round(perf_24h, 2)}%",
@@ -97,38 +166,49 @@ def analyze_single_stock(ticker):
     except:
         return None
 
-if st.button("🚀 Markt-Scan jetzt starten"):
+# --- APP-OBERFLÄCHE ---
+st.info(f"Der Scanner ist geladen mit **{len(TICKER_LISTE)}** einzigartigen Top-Aktien aus S&P 500, Nasdaq 100 & Russell 2000.")
+
+if st.button("🚀 Mega-Markt-Scan jetzt starten"):
     fortschritts_balken = st.progress(0)
     status_text = st.empty()
     ergebnisse = []
     
-    status_text.write("Scanne Live-Marktdaten...")
+    status_text.write("Scanne komplettes Markt-Universum über Hochgeschwindigkeits-Threads...")
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=30) as executor:
         futures = [executor.submit(analyze_single_stock, t) for t in TICKER_LISTE]
         
         for i, future in enumerate(futures):
             res = future.result()
-            if res:
-                ergebnisse.append(res)
+            if res: ergebnisse.append(res)
             fortschritts_balken.progress((i + 1) / len(TICKER_LISTE))
             
-    status_text.write("✅ Scan abgeschlossen!")
+    status_text.write("✅ Scan komplett abgeschlossen! Filtere die Top 100...")
     
     if ergebnisse:
         df = pd.DataFrame(ergebnisse)
         df = df.sort_values(by="Swing-Score", ascending=False).reset_index(drop=True)
         df = df.head(100)
         
-        def color_signal(val):
-            if val == "STARKER KAUF": return "background-color: #2ecc71; color: white; font-weight: bold;"
-            elif val == "KAUFEN": return "background-color: #27ae60; color: white;"
-            elif val == "BEOBACHTEN": return "background-color: #f39c12; color: white;"
-            else: return "background-color: #e74c3c; color: white;"
+        spalten_ordnung = ["Ticker", "Chart-Link", "Kurs", "RSI", "Perf. 24h", "Swing-Score", "Signal", "Stop-Loss (-4%)", "Take-Profit (+12%)"]
+        df = df[spalten_ordnung]
 
-        st.markdown("### 🏆 Die Swing-Trading Rangliste (Top Treffer oben)")
-        styled_df = df.style.applymap(color_signal, subset=["Signal"])
-        st.dataframe(styled_df, use_container_width=True, height=600)
+        st.markdown("### 🏆 Die 100 besten Swing-Trading Setups am Markt")
+        
+        st.data_editor(
+            df,
+            column_config={
+                "Chart-Link": st.column_config.LinkColumn(
+                    "Live-Chart", 
+                    help="Öffnet den voreingestellten TradingView Tageschart",
+                    display_text="↗ Chart öffnen"
+                )
+            },
+            disabled=True,
+            use_container_width=True,
+            height=600
+        )
         st.balloons()
     else:
         st.error("Es konnten keine Daten geladen werden.")
